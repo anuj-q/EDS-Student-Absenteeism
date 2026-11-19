@@ -1,0 +1,10 @@
+if_these_answers,then_also,antecedent support,consequent support,support,confidence,lift,leverage,conviction
+{sleep = Disagree},{freq = Sometimes},0.1383,0.3830,0.1064,0.7692,2.0085,0.0534,2.6738
+{reason = Boring or ineffective lectures},{impact = Neutral},0.3085,0.3511,0.1702,0.5517,1.5716,0.0619,1.4476
+{conseq = Difficulty catching up},{impact = Neutral},0.2553,0.3511,0.1383,0.5417,1.5429,0.0487,1.4159
+{impact = Positive},{boring = Agree},0.2128,0.4574,0.1489,0.7000,1.5302,0.0516,1.8085
+{boring = Strongly agree},{impact = Neutral},0.2872,0.3511,0.1489,0.5185,1.4770,0.0481,1.3478
+{impact = Positive},{freq = Sometimes},0.2128,0.3830,0.1170,0.5500,1.4361,0.0355,1.3712
+{freq = Often},{boring = Agree},0.1702,0.4574,0.1064,0.6250,1.3663,0.0285,1.4468
+{sleep = Neutral},{boring = Agree},0.2766,0.4574,0.1702,0.6154,1.3453,0.0437,1.4106
+{reason = Tiredness / lack of sleep},{boring = Agree},0.1809,0.4574,0.1064,0.5882,1.2859,0.0237,1.3176

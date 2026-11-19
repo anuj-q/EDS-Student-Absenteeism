@@ -1,0 +1,13 @@
+feature,question,versus,chi2,dof,p_value,cramers_v,sparse_expected_counts
+boring,Boring lectures reduce my motivation to attend.,5-level frequency,26.282528,16,0.050180,0.264387,True
+boring,Boring lectures reduce my motivation to attend.,binary frequent-skipper,5.345127,4,0.253682,0.238460,True
+impact,"Overall, how do you rate the academic impact of skipping classes?",5-level frequency,12.471622,16,0.710927,0.182124,True
+impact,"Overall, how do you rate the academic impact of skipping classes?",binary frequent-skipper,2.448533,4,0.653875,0.161395,True
+sleep,Poor sleep makes me skip morning classes.,5-level frequency,18.327756,16,0.305057,0.220781,True
+sleep,Poor sleep makes me skip morning classes.,binary frequent-skipper,4.170807,4,0.383383,0.210643,True
+reason,What is the main reason you skip classes?,5-level frequency,41.247564,36,0.251918,0.331211,True
+reason,What is the main reason you skip classes?,binary frequent-skipper,9.260497,9,0.413584,0.313872,True
+conseq,What is the biggest consequence of skipping classes?,5-level frequency,13.898307,20,0.835614,0.192259,True
+conseq,What is the biggest consequence of skipping classes?,binary frequent-skipper,2.181396,5,0.823519,0.152336,True
+improve,What is the biggest factor that would improve your attendance?,5-level frequency,38.018452,20,0.008810,0.317983,True
+improve,What is the biggest factor that would improve your attendance?,binary frequent-skipper,21.180312,5,0.000749,0.474681,True

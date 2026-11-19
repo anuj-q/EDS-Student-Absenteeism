@@ -1,0 +1,224 @@
+EDS Project: What Makes Students Skip Classes?
+Classifier + association rules  |  94 Google Form responses
+Data file: /workspace/eds_model/eds_responses.csv
+
+Loaded 94 rows, 8 columns. No missing answers in model fields.
+
+Skip frequency counts:
+  Never         12  (12.8%)
+  Rarely        23  (24.5%)
+  Sometimes     36  (38.3%)
+  Often         16  (17.0%)  ← frequent skipper
+  Very often     7  ( 7.4%)  ← frequent skipper
+
+========================================================================
+A) CLASSIFIER — frequent skipper vs everyone else
+========================================================================
+
+Target: 1 if freq is Often or Very often, else 0.
+Class counts: frequent skippers = 23 (24.5%), not frequent = 71 (75.5%).
+Validation: Repeated Stratified 5-fold CV, 10 repeats (50 scores), random_state=42.
+Metrics are for the positive class (frequent skipper).
+
+Decision Tree
+-------------
+  accuracy    0.537  ± 0.134
+  precision   0.265  ± 0.141
+  recall      0.498  ± 0.285
+  f1          0.329  ± 0.160
+  roc_auc     0.535  ± 0.132
+
+Logistic Regression
+-------------------
+  accuracy    0.695  ± 0.092
+  precision   0.412  ± 0.184
+  recall      0.577  ± 0.257
+  f1          0.466  ± 0.184
+  roc_auc     0.709  ± 0.144
+
+Majority baseline
+-----------------
+  accuracy    0.756  ± 0.023
+  precision   0.000  ± 0.000
+  recall      0.000  ± 0.000
+  f1          0.000  ± 0.000
+  roc_auc     0.500  ± 0.000
+
+How to read this: the majority baseline already gets about 75.5% accuracy by always saying 'not frequent'.
+A balanced model is trying to catch the 23 frequent skippers, so its
+accuracy can be similar or even lower, while recall, F1 and ROC-AUC
+tell you whether it actually found those students.
+
+Out-of-fold confusion matrix — Decision Tree (single 5-fold, each student once)
+                  Pred not frequent    Pred frequent
+  Actually not               42                 29
+  Actually frequent           7                 16
+  accuracy=0.617  precision=0.356  recall=0.696  F1=0.471
+
+Out-of-fold confusion matrix — Logistic Regression (single 5-fold, each student once)
+                  Pred not frequent    Pred frequent
+  Actually not               56                 15
+  Actually frequent          10                 13
+  accuracy=0.734  precision=0.464  recall=0.565  F1=0.510
+
+Saved confusion_matrices.png
+
+Fitting both models on all 94 responses for interpretation plots...
+
+Decision tree as if-then rules (fitted on all 94 responses):
+Likert / impact answers are coded 0=lowest ... 4=highest.
+A split at 2.5 therefore means 'Neutral or below' vs 'Agree / Positive or above'.
+One-hot features are 0 or 1. The 'value' numbers in the PNG are class-weighted;
+the student counts printed here are the raw numbers.
+
+if Boring lectures <= 2.50 (i.e. Neutral or below  vs  Agree or Strongly agree):
+    if Reason: Attendance not strictly enforced <= 0.50 (0 = no, 1 = yes for this one-hot option):
+        → predict Not frequent  (leaf has 18 students: 18 not frequent, 0 frequent skippers)
+    else  # Reason: Attendance not strictly enforced > 0.50:
+        → predict Frequent skipper  (leaf has 6 students: 4 not frequent, 2 frequent skippers)
+else  # Boring lectures > 2.50:
+    if Poor sleep (mornings) <= 2.50 (i.e. Neutral or below  vs  Agree or Strongly agree):
+        if Perceived impact <= 2.50 (i.e. Neutral or more negative  vs  Positive or Very positive):
+            → predict Not frequent  (leaf has 22 students: 17 not frequent, 5 frequent skippers)
+        else  # Perceived impact > 2.50:
+            → predict Not frequent  (leaf has 10 students: 10 not frequent, 0 frequent skippers)
+    else  # Poor sleep (mornings) > 2.50:
+        if Would improve attendance: Stricter attendance rules <= 0.50 (0 = no, 1 = yes for this one-hot option):
+            → predict Frequent skipper  (leaf has 30 students: 15 not frequent, 15 frequent skippers)
+        else  # Would improve attendance: Stricter attendance rules > 0.50:
+            → predict Not frequent  (leaf has 8 students: 7 not frequent, 1 frequent skippers)
+
+Saved decision_tree.png
+Saved feature_importance_dt.png
+Decision tree feature importances (only features used in a split):
+  Poor sleep (mornings)                                    0.249
+  Boring lectures                                          0.241
+  Reason: Attendance not strictly enforced                 0.208
+  Would improve attendance: Stricter attendance rules      0.152
+  Perceived impact                                         0.150
+
+Saved coefficients_lr.png
+Logistic regression — 10 coefficients with largest absolute value
+(standardised features; positive → more likely a frequent skipper):
+  Boring lectures                                          +1.118  (more frequent)
+  Poor sleep (mornings)                                    +0.796  (more frequent)
+  Reason: Part-time work / family duties                   -0.730  (less frequent)
+  Would improve attendance: Other                          +0.727  (more frequent)
+  Reason: Preparing for other exams or assignments         +0.706  (more frequent)
+  Would improve attendance: Supportive teachers            +0.604  (more frequent)
+  Reason: All of the above                                 -0.577  (less frequent)
+  Reason: Health issues                                    -0.574  (less frequent)
+  Would improve attendance: Stricter attendance rules      -0.572  (less frequent)
+  Reason: Tiredness / lack of sleep                        -0.510  (less frequent)
+
+========================================================================
+Example: predict_student() on two made-up answer profiles
+These use the models fitted on all 94 rows, so they are a
+demonstration of the API, not a held-out test result.
+========================================================================
+
+Student A — lectures feel boring, wants a flexible timetable, tired
+  reason   Tiredness / lack of sleep
+  boring   Strongly agree
+  impact   Neutral
+  conseq   Difficulty catching up
+  improve  Flexible timetable
+  sleep    Agree
+  Decision Tree           Frequent skipper  (P(frequent) = 75.5%)
+  Logistic Regression     Not frequent skipper  (P(frequent) = 45.2%)
+
+Student B — rarely-skip profile, does not find lectures boring
+  reason   Health issues
+  boring   Disagree
+  impact   Very negative
+  conseq   Lower internal marks / attendance shortage
+  improve  Stricter attendance rules
+  sleep    Disagree
+  Decision Tree           Not frequent skipper  (P(frequent) = 0.0%)
+  Logistic Regression     Not frequent skipper  (P(frequent) = 0.0%)
+
+========================================================================
+B) ASSOCIATION RULES — Apriori on all 7 survey answers
+========================================================================
+
+42 unique answer-items from 7 questions, n = 94.
+Apriori min_support = 0.1 (at least 10 students), association_rules min_confidence = 0.5.
+
+Frequent itemsets found: 69
+Rules found: 9  (saved association_rules.csv)
+
+Top 9 rules by lift:
+
+ 1. IF  {sleep = Disagree}
+    THEN {freq = Sometimes}
+    support=0.106 (10/94 students)  confidence=0.769  lift=2.009
+
+ 2. IF  {reason = Boring or ineffective lectures}
+    THEN {impact = Neutral}
+    support=0.170 (16/94 students)  confidence=0.552  lift=1.572
+
+ 3. IF  {conseq = Difficulty catching up}
+    THEN {impact = Neutral}
+    support=0.138 (13/94 students)  confidence=0.542  lift=1.543
+
+ 4. IF  {impact = Positive}
+    THEN {boring = Agree}
+    support=0.149 (14/94 students)  confidence=0.700  lift=1.530
+
+ 5. IF  {boring = Strongly agree}
+    THEN {impact = Neutral}
+    support=0.149 (14/94 students)  confidence=0.519  lift=1.477
+
+ 6. IF  {impact = Positive}
+    THEN {freq = Sometimes}
+    support=0.117 (11/94 students)  confidence=0.550  lift=1.436
+
+ 7. IF  {freq = Often}
+    THEN {boring = Agree}
+    support=0.106 (10/94 students)  confidence=0.625  lift=1.366
+
+ 8. IF  {sleep = Neutral}
+    THEN {boring = Agree}
+    support=0.170 (16/94 students)  confidence=0.615  lift=1.345
+
+ 9. IF  {reason = Tiredness / lack of sleep}
+    THEN {boring = Agree}
+    support=0.106 (10/94 students)  confidence=0.588  lift=1.286
+
+Saved association_rules.png
+
+========================================================================
+C) CHI-SQUARE tests — each question vs skip frequency
+========================================================================
+
+H0: the answer to this question is independent of skip frequency.
+A small p-value (e.g. < 0.05) is evidence of a relationship.
+Cramer's V is the effect size (around 0.1 small, 0.3 medium, 0.5 large,
+though these rules of thumb are rough for tables bigger than 2x2).
+
+vs 5-level frequency
+feature         chi2  dof    p-value  Cramér V  sparse?
+boring         26.28   16     0.0502     0.264  yes (p approximate)
+impact         12.47   16     0.7109     0.182  yes (p approximate)
+sleep          18.33   16     0.3051     0.221  yes (p approximate)
+reason         41.25   36     0.2519     0.331  yes (p approximate)
+conseq         13.90   20     0.8356     0.192  yes (p approximate)
+improve        38.02   20     0.0088*    0.318  yes (p approximate)
+  *  p < 0.05
+
+vs binary frequent-skipper
+feature         chi2  dof    p-value  Cramér V  sparse?
+boring          5.35    4     0.2537     0.238  yes (p approximate)
+impact          2.45    4     0.6539     0.161  yes (p approximate)
+sleep           4.17    4     0.3834     0.211  yes (p approximate)
+reason          9.26    9     0.4136     0.314  yes (p approximate)
+conseq          2.18    5     0.8235     0.152  yes (p approximate)
+improve        21.18    5     0.0007*    0.475  yes (p approximate)
+  *  p < 0.05
+
+Saved chi_square.csv
+
+========================================================================
+Done. Figures and CSV tables are in:
+  /workspace/eds_model
+========================================================================

@@ -1,0 +1,483 @@
+{
+  "project": "What Makes Students Skip Classes?",
+  "model": "Logistic Regression",
+  "n_rows": 94,
+  "n_frequent": 23,
+  "n_not_frequent": 71,
+  "class_weight": "balanced",
+  "random_state": 42,
+  "threshold": 0.5,
+  "intercept": -0.8639592458748483,
+  "features": [
+    {
+      "name": "boring",
+      "kind": "ordinal",
+      "group": "boring",
+      "category": null,
+      "coef": 1.1181277116323665,
+      "mean": 2.9148936170212765,
+      "scale": 0.9638086513111594
+    },
+    {
+      "name": "impact",
+      "kind": "ordinal",
+      "group": "impact",
+      "category": null,
+      "coef": -0.2711040812399787,
+      "mean": 1.9148936170212767,
+      "scale": 1.058497273517681
+    },
+    {
+      "name": "sleep",
+      "kind": "ordinal",
+      "group": "sleep",
+      "category": null,
+      "coef": 0.7962365625972365,
+      "mean": 2.5106382978723403,
+      "scale": 1.0183913143637706
+    },
+    {
+      "name": "reason_All of the above",
+      "kind": "onehot",
+      "group": "reason",
+      "category": "All of the above",
+      "coef": -0.5773020194523588,
+      "mean": 0.010638297872340425,
+      "scale": 0.10259202937226548
+    },
+    {
+      "name": "reason_Attendance not strictly enforced",
+      "kind": "onehot",
+      "group": "reason",
+      "category": "Attendance not strictly enforced",
+      "coef": 0.4416580912399229,
+      "mean": 0.14893617021276595,
+      "scale": 0.35602554320598945
+    },
+    {
+      "name": "reason_Boring or ineffective lectures",
+      "kind": "onehot",
+      "group": "reason",
+      "category": "Boring or ineffective lectures",
+      "coef": 0.31647845962637267,
+      "mean": 0.30851063829787234,
+      "scale": 0.46187858183175323
+    },
+    {
+      "name": "reason_Commute or transport problems",
+      "kind": "onehot",
+      "group": "reason",
+      "category": "Commute or transport problems",
+      "coef": 0.06639571945358146,
+      "mean": 0.05319148936170213,
+      "scale": 0.22441513946520192
+    },
+    {
+      "name": "reason_Depends on the day",
+      "kind": "onehot",
+      "group": "reason",
+      "category": "Depends on the day",
+      "coef": -0.3334857609169838,
+      "mean": 0.010638297872340425,
+      "scale": 0.10259202937226548
+    },
+    {
+      "name": "reason_Health issues",
+      "kind": "onehot",
+      "group": "reason",
+      "category": "Health issues",
+      "coef": -0.5742754397263455,
+      "mean": 0.05319148936170213,
+      "scale": 0.2244151394652019
+    },
+    {
+      "name": "reason_Part-time work / family duties",
+      "kind": "onehot",
+      "group": "reason",
+      "category": "Part-time work / family duties",
+      "coef": -0.7296420960327767,
+      "mean": 0.0425531914893617,
+      "scale": 0.2018475102235137
+    },
+    {
+      "name": "reason_Preparing for other exams or assignments",
+      "kind": "onehot",
+      "group": "reason",
+      "category": "Preparing for other exams or assignments",
+      "coef": 0.705928199724387,
+      "mean": 0.10638297872340426,
+      "scale": 0.3083271648125414
+    },
+    {
+      "name": "reason_Social plans / extracurriculars",
+      "kind": "onehot",
+      "group": "reason",
+      "category": "Social plans / extracurriculars",
+      "coef": 0.10664837194055901,
+      "mean": 0.0851063829787234,
+      "scale": 0.27903993720434067
+    },
+    {
+      "name": "reason_Tiredness / lack of sleep",
+      "kind": "onehot",
+      "group": "reason",
+      "category": "Tiredness / lack of sleep",
+      "coef": -0.5095945889266043,
+      "mean": 0.18085106382978725,
+      "scale": 0.3848947343643731
+    },
+    {
+      "name": "conseq_Difficulty catching up",
+      "kind": "onehot",
+      "group": "conseq",
+      "category": "Difficulty catching up",
+      "coef": 0.2791954126901766,
+      "mean": 0.2553191489361702,
+      "scale": 0.4360404581259402
+    },
+    {
+      "name": "conseq_Less interaction with teachers and peers",
+      "kind": "onehot",
+      "group": "conseq",
+      "category": "Less interaction with teachers and peers",
+      "coef": 0.12079559477915056,
+      "mean": 0.09574468085106383,
+      "scale": 0.2942407805519004
+    },
+    {
+      "name": "conseq_Lower internal marks / attendance shortage",
+      "kind": "onehot",
+      "group": "conseq",
+      "category": "Lower internal marks / attendance shortage",
+      "coef": -0.23380373416831104,
+      "mean": 0.1276595744680851,
+      "scale": 0.33371036470974696
+    },
+    {
+      "name": "conseq_Missing important topics",
+      "kind": "onehot",
+      "group": "conseq",
+      "category": "Missing important topics",
+      "coef": -0.24754803357140073,
+      "mean": 0.35106382978723405,
+      "scale": 0.4773028568973309
+    },
+    {
+      "name": "conseq_Other",
+      "kind": "onehot",
+      "group": "conseq",
+      "category": "Other",
+      "coef": -0.3232623199111325,
+      "mean": 0.05319148936170213,
+      "scale": 0.2244151394652019
+    },
+    {
+      "name": "conseq_Poor understanding in exams",
+      "kind": "onehot",
+      "group": "conseq",
+      "category": "Poor understanding in exams",
+      "coef": 0.3466825277415068,
+      "mean": 0.11702127659574468,
+      "scale": 0.321445636802939
+    },
+    {
+      "name": "improve_Flexible timetable",
+      "kind": "onehot",
+      "group": "improve",
+      "category": "Flexible timetable",
+      "coef": -0.10598947129596471,
+      "mean": 0.1702127659574468,
+      "scale": 0.37581961133310005
+    },
+    {
+      "name": "improve_Interactive teaching methods",
+      "kind": "onehot",
+      "group": "improve",
+      "category": "Interactive teaching methods",
+      "coef": -0.40382008885000353,
+      "mean": 0.32978723404255317,
+      "scale": 0.4701357402975392
+    },
+    {
+      "name": "improve_Other",
+      "kind": "onehot",
+      "group": "improve",
+      "category": "Other",
+      "coef": 0.7271478140469588,
+      "mean": 0.031914893617021274,
+      "scale": 0.17577352810487556
+    },
+    {
+      "name": "improve_Practical / industry-relevant content",
+      "kind": "onehot",
+      "group": "improve",
+      "category": "Practical / industry-relevant content",
+      "coef": 0.2654469328649299,
+      "mean": 0.26595744680851063,
+      "scale": 0.44184169483606783
+    },
+    {
+      "name": "improve_Stricter attendance rules",
+      "kind": "onehot",
+      "group": "improve",
+      "category": "Stricter attendance rules",
+      "coef": -0.5723391742977503,
+      "mean": 0.11702127659574468,
+      "scale": 0.32144563680293886
+    },
+    {
+      "name": "improve_Supportive teachers",
+      "kind": "onehot",
+      "group": "improve",
+      "category": "Supportive teachers",
+      "coef": 0.604072130067454,
+      "mean": 0.0851063829787234,
+      "scale": 0.27903993720434067
+    }
+  ],
+  "feature_order": [
+    "boring",
+    "impact",
+    "sleep",
+    "reason_All of the above",
+    "reason_Attendance not strictly enforced",
+    "reason_Boring or ineffective lectures",
+    "reason_Commute or transport problems",
+    "reason_Depends on the day",
+    "reason_Health issues",
+    "reason_Part-time work / family duties",
+    "reason_Preparing for other exams or assignments",
+    "reason_Social plans / extracurriculars",
+    "reason_Tiredness / lack of sleep",
+    "conseq_Difficulty catching up",
+    "conseq_Less interaction with teachers and peers",
+    "conseq_Lower internal marks / attendance shortage",
+    "conseq_Missing important topics",
+    "conseq_Other",
+    "conseq_Poor understanding in exams",
+    "improve_Flexible timetable",
+    "improve_Interactive teaching methods",
+    "improve_Other",
+    "improve_Practical / industry-relevant content",
+    "improve_Stricter attendance rules",
+    "improve_Supportive teachers"
+  ],
+  "ordinal": {
+    "boring": {
+      "order": [
+        "Strongly disagree",
+        "Disagree",
+        "Neutral",
+        "Agree",
+        "Strongly agree"
+      ],
+      "map": {
+        "Strongly disagree": 0,
+        "Disagree": 1,
+        "Neutral": 2,
+        "Agree": 3,
+        "Strongly agree": 4
+      }
+    },
+    "impact": {
+      "order": [
+        "Very negative",
+        "Negative",
+        "Neutral",
+        "Positive",
+        "Very positive"
+      ],
+      "map": {
+        "Very negative": 0,
+        "Negative": 1,
+        "Neutral": 2,
+        "Positive": 3,
+        "Very positive": 4
+      }
+    },
+    "sleep": {
+      "order": [
+        "Strongly disagree",
+        "Disagree",
+        "Neutral",
+        "Agree",
+        "Strongly agree"
+      ],
+      "map": {
+        "Strongly disagree": 0,
+        "Disagree": 1,
+        "Neutral": 2,
+        "Agree": 3,
+        "Strongly agree": 4
+      }
+    }
+  },
+  "onehot_categories": {
+    "reason": [
+      "All of the above",
+      "Attendance not strictly enforced",
+      "Boring or ineffective lectures",
+      "Commute or transport problems",
+      "Depends on the day",
+      "Health issues",
+      "Part-time work / family duties",
+      "Preparing for other exams or assignments",
+      "Social plans / extracurriculars",
+      "Tiredness / lack of sleep"
+    ],
+    "conseq": [
+      "Difficulty catching up",
+      "Less interaction with teachers and peers",
+      "Lower internal marks / attendance shortage",
+      "Missing important topics",
+      "Other",
+      "Poor understanding in exams"
+    ],
+    "improve": [
+      "Flexible timetable",
+      "Interactive teaching methods",
+      "Other",
+      "Practical / industry-relevant content",
+      "Stricter attendance rules",
+      "Supportive teachers"
+    ]
+  },
+  "options": {
+    "reason": [
+      "Boring or ineffective lectures",
+      "Tiredness / lack of sleep",
+      "Attendance not strictly enforced",
+      "Preparing for other exams or assignments",
+      "Social plans / extracurriculars",
+      "Commute or transport problems",
+      "Health issues",
+      "Part-time work / family duties",
+      "Depends on the day",
+      "All of the above"
+    ],
+    "boring": [
+      "Strongly disagree",
+      "Disagree",
+      "Neutral",
+      "Agree",
+      "Strongly agree"
+    ],
+    "impact": [
+      "Very negative",
+      "Negative",
+      "Neutral",
+      "Positive",
+      "Very positive"
+    ],
+    "conseq": [
+      "Missing important topics",
+      "Difficulty catching up",
+      "Lower internal marks / attendance shortage",
+      "Poor understanding in exams",
+      "Less interaction with teachers and peers",
+      "Other"
+    ],
+    "improve": [
+      "Interactive teaching methods",
+      "Practical / industry-relevant content",
+      "Flexible timetable",
+      "Stricter attendance rules",
+      "Supportive teachers",
+      "Other"
+    ],
+    "sleep": [
+      "Strongly disagree",
+      "Disagree",
+      "Neutral",
+      "Agree",
+      "Strongly agree"
+    ]
+  },
+  "questions": {
+    "reason": "What is the main reason you skip classes?",
+    "freq": "How often do you skip classes?",
+    "boring": "Boring lectures reduce my motivation to attend.",
+    "impact": "Overall, how do you rate the academic impact of skipping classes?",
+    "conseq": "What is the biggest consequence of skipping classes?",
+    "improve": "What is the biggest factor that would improve your attendance?",
+    "sleep": "Poor sleep makes me skip morning classes."
+  },
+  "cv_metrics": {
+    "validation": "Repeated stratified 5-fold CV, 10 repeats, random_state=42",
+    "logistic_regression": {
+      "accuracy": 0.695,
+      "precision": 0.412,
+      "recall": 0.577,
+      "f1": 0.466,
+      "roc_auc": 0.709
+    },
+    "majority_baseline": {
+      "accuracy": 0.756
+    }
+  },
+  "presets": [
+    {
+      "id": "typical",
+      "label": "Typical answers",
+      "blurb": "The most common answer on each question.",
+      "answers": {
+        "reason": "Boring or ineffective lectures",
+        "boring": "Agree",
+        "impact": "Neutral",
+        "conseq": "Missing important topics",
+        "improve": "Interactive teaching methods",
+        "sleep": "Agree"
+      },
+      "probability": 0.25384133445220536
+    },
+    {
+      "id": "student_a",
+      "label": "Tired and bored",
+      "blurb": "Lectures feel boring, tiredness is the main reason, wants a flexible timetable.",
+      "answers": {
+        "reason": "Tiredness / lack of sleep",
+        "boring": "Strongly agree",
+        "impact": "Neutral",
+        "conseq": "Difficulty catching up",
+        "improve": "Flexible timetable",
+        "sleep": "Agree"
+      },
+      "probability": 0.4522856393956104
+    },
+    {
+      "id": "student_b",
+      "label": "Rarely skips",
+      "blurb": "Does not find lectures boring, sleeps all right, wants stricter attendance rules.",
+      "answers": {
+        "reason": "Health issues",
+        "boring": "Disagree",
+        "impact": "Very negative",
+        "conseq": "Lower internal marks / attendance shortage",
+        "improve": "Stricter attendance rules",
+        "sleep": "Disagree"
+      },
+      "probability": 0.00015106262815164838
+    },
+    {
+      "id": "high_risk",
+      "label": "Higher chance",
+      "blurb": "Strongly agrees lectures are boring and sleep is a problem; wants more supportive teachers.",
+      "answers": {
+        "reason": "Preparing for other exams or assignments",
+        "boring": "Strongly agree",
+        "impact": "Neutral",
+        "conseq": "Poor understanding in exams",
+        "improve": "Supportive teachers",
+        "sleep": "Strongly agree"
+      },
+      "probability": 0.9991664667939157
+    }
+  ],
+  "verification": {
+    "n_rows": 94,
+    "max_abs_error_vs_sklearn": 2.220446049250313e-16,
+    "mean_abs_error_vs_sklearn": 3.957568610885386e-17,
+    "tolerance": 1e-06,
+    "passed": true
+  }
+}
