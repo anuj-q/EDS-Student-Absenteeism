@@ -1,21 +1,25 @@
 #!/usr/bin/env python3
 """
 EDS Project: What Makes Students Skip Classes?
-Frequent-skipper classifier — cross-validation and confusion matrices.
+Classifier + association rules
 
 This script is meant to be easy for a student to read and explain in a viva.
 
 What it does
 ------------
-Predict whether a student is a "frequent skipper" (survey answer Often or
-Very often) from their other six answers. Compares a shallow Decision Tree
-with Logistic Regression, using stratified cross-validation because the
-data set is small (94 rows).
+A) Classification
+   Predict whether a student is a "frequent skipper"
+   (survey answer Often or Very often) from their other six answers.
+   Compares a shallow Decision Tree with Logistic Regression, using
+   stratified cross-validation because the data set is small (94 rows).
 
-Out-of-fold confusion matrices count each student once. The tree picture,
-feature importances, logistic-regression coefficients, and the two
-predict_student() examples are fitted on all 94 rows so they can be
-explained. They are not test-set scores.
+B) Association rules
+   Treats every survey answer as an "item" and uses the Apriori
+   algorithm to find answers that often appear together.
+
+C) Chi-square tests
+   Checks whether each survey question is statistically related to
+   how often a student says they skip class.
 
 Data
 ----
@@ -46,7 +50,8 @@ From the repository root:
     python src/eds_model.py
 
 Outputs (written to outputs/): decision_tree.png, confusion_matrices.png,
-feature_importance_dt.png, coefficients_lr.png
+feature_importance_dt.png, coefficients_lr.png, association_rules.png,
+association_rules.csv, chi_square.csv
 """
 
 from __future__ import annotations
@@ -60,6 +65,8 @@ matplotlib.use("Agg")  # save figures without opening a window
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from mlxtend.frequent_patterns import apriori, association_rules
+from scipy.stats import chi2_contingency
 from sklearn.base import clone
 from sklearn.compose import ColumnTransformer
 from sklearn.dummy import DummyClassifier
@@ -607,12 +614,224 @@ def print_example_predictions(models: dict[str, Pipeline]) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Chi-square tests
+# ---------------------------------------------------------------------------
+
+def cramers_v(chi2: float, n: int, n_rows: int, n_cols: int) -> float:
+    """Effect size for a chi-square test of independence (0 = none, 1 = perfect)."""
+    k = min(n_rows, n_cols) - 1
+    if k <= 0 or n <= 0:
+        return float("nan")
+    return float(np.sqrt(chi2 / (n * k)))
+
+
+def chi_square_section(df: pd.DataFrame, y: pd.Series) -> pd.DataFrame:
+    """
+    Test each feature against skip frequency.
+
+    We run two versions:
+      * vs the original 5-level frequency (Never … Very often)
+      * vs the binary frequent-skipper label used by the classifier
+
+    With only 94 rows, many tables have expected counts below 5, so the
+    p-value is only a rough guide. That is flagged in the 'sparse' column.
+    """
+    print("=" * 72)
+    print("C) CHI-SQUARE tests — each question vs skip frequency")
+    print("=" * 72)
+    print(
+        "\nH0: the answer to this question is independent of skip frequency."
+        "\nA small p-value (e.g. < 0.05) is evidence of a relationship."
+        "\nCramer's V is the effect size (around 0.1 small, 0.3 medium, 0.5 large,"
+        "\nthough these rules of thumb are rough for tables bigger than 2x2).\n"
+    )
+    rows = []
+    features = FEATURE_COLS
+    targets = {
+        "5-level frequency": df["freq"],
+        "binary frequent-skipper": y.map({0: "Not frequent", 1: "Frequent"}),
+    }
+    for feat in features:
+        for tgt_name, tgt in targets.items():
+            table = pd.crosstab(df[feat], tgt)
+            chi2, p, dof, expected = chi2_contingency(table)
+            sparse = bool((expected < 5).any())
+            v = cramers_v(chi2, n=len(df), n_rows=table.shape[0], n_cols=table.shape[1])
+            rows.append(
+                {
+                    "feature": feat,
+                    "question": QUESTIONS[feat],
+                    "versus": tgt_name,
+                    "chi2": chi2,
+                    "dof": dof,
+                    "p_value": p,
+                    "cramers_v": v,
+                    "sparse_expected_counts": sparse,
+                }
+            )
+
+    result = pd.DataFrame(rows)
+    # Print a compact table
+    for tgt_name in targets:
+        sub = result[result["versus"] == tgt_name]
+        print(f"vs {tgt_name}")
+        print(f"{'feature':10s}  {'chi2':>8s}  {'dof':>3s}  {'p-value':>9s}  {'Cramér V':>8s}  sparse?")
+        for _, r in sub.iterrows():
+            star = "*" if r["p_value"] < 0.05 else " "
+            sparse = "yes (p approximate)" if r["sparse_expected_counts"] else "no"
+            print(
+                f"{r['feature']:10s}  {r['chi2']:8.2f}  {int(r['dof']):3d}  "
+                f"{r['p_value']:9.4f}{star} {r['cramers_v']:8.3f}  {sparse}"
+            )
+        print("  *  p < 0.05\n")
+    out = OUT_DIR / "chi_square.csv"
+    result.to_csv(out, index=False, float_format="%.6f")
+    print(f"Saved {out.name}\n")
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Association rules
+# ---------------------------------------------------------------------------
+
+def answers_to_onehot(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Turn each of the 7 answers into 0/1 item columns, e.g.
+    'freq = Often', 'reason = Boring or ineffective lectures'.
+    """
+    item_frames = []
+    for col in ["reason", "freq", "boring", "impact", "conseq", "improve", "sleep"]:
+        dummies = pd.get_dummies(df[col], prefix=col, prefix_sep=" = ")
+        item_frames.append(dummies)
+    items = pd.concat(item_frames, axis=1)
+    # mlxtend wants True/False, not 0/1
+    return items.astype(bool)
+
+
+def format_itemset(items) -> str:
+    if isinstance(items, (set, frozenset)):
+        parts = sorted(str(x) for x in items)
+    else:
+        parts = [str(items)]
+    return "{" + "; ".join(parts) + "}"
+
+
+def association_rules_section(df: pd.DataFrame, min_support=0.10, min_confidence=0.50):
+    """
+    Apriori frequent itemsets + association rules.
+
+    min_support=0.10  → the itemset must appear in at least ~9 of 94 answers.
+    min_confidence=0.50 → when the left side is present, the right side
+                          is present at least half the time.
+    Rules are sorted by lift. Lift > 1 means the answers go together
+    more often than if they were independent.
+    """
+    print("=" * 72)
+    print("B) ASSOCIATION RULES — Apriori on all 7 survey answers")
+    print("=" * 72)
+
+    onehot = answers_to_onehot(df)
+    print(
+        f"\n{onehot.shape[1]} unique answer-items from 7 questions, n = {len(df)}."
+        f"\nApriori min_support = {min_support} (at least {int(np.ceil(min_support * len(df)))} students),"
+        f" association_rules min_confidence = {min_confidence}.\n"
+    )
+
+    frequent = apriori(onehot, min_support=min_support, use_colnames=True)
+    print(f"Frequent itemsets found: {len(frequent)}")
+    if frequent.empty:
+        print("No frequent itemsets. Try a lower min_support.")
+        return pd.DataFrame()
+
+    # num_itemsets is required in recent mlxtend versions
+    kwargs = dict(
+        metric="confidence",
+        min_threshold=min_confidence,
+        num_itemsets=len(frequent),
+    )
+    try:
+        rules = association_rules(frequent, **kwargs)
+    except TypeError:
+        kwargs.pop("num_itemsets")
+        rules = association_rules(frequent, **kwargs)
+
+    if rules.empty:
+        print("No rules met the confidence threshold. Try a lower min_confidence.")
+        return rules
+
+    rules = rules.sort_values(["lift", "confidence", "support"], ascending=False)
+    rules["antecedents_str"] = rules["antecedents"].apply(format_itemset)
+    rules["consequents_str"] = rules["consequents"].apply(format_itemset)
+    # Keep a tidy CSV (frozenset columns are awkward in spreadsheets)
+    csv_cols = [
+        "antecedents_str",
+        "consequents_str",
+        "antecedent support",
+        "consequent support",
+        "support",
+        "confidence",
+        "lift",
+        "leverage",
+        "conviction",
+    ]
+    # conviction may be inf; that's OK
+    out_csv = OUT_DIR / "association_rules.csv"
+    rules[csv_cols].rename(
+        columns={"antecedents_str": "if_these_answers", "consequents_str": "then_also"}
+    ).to_csv(out_csv, index=False, float_format="%.4f")
+    print(f"Rules found: {len(rules)}  (saved {out_csv.name})\n")
+
+    top_n = min(15, len(rules))
+    print(f"Top {top_n} rules by lift:\n")
+    for i, r in enumerate(rules.head(top_n).itertuples(index=False), start=1):
+        n_both = int(round(r.support * len(df)))
+        print(
+            f"{i:2d}. IF  {r.antecedents_str}"
+            f"\n    THEN {r.consequents_str}"
+            f"\n    support={r.support:.3f} ({n_both}/{len(df)} students)  "
+            f"confidence={r.confidence:.3f}  lift={r.lift:.3f}\n"
+        )
+
+    # Optional chart of the top rules
+    plot_top_rules(rules.head(10), OUT_DIR / "association_rules.png")
+    return rules
+
+
+def plot_top_rules(rules: pd.DataFrame, path: Path) -> None:
+    if rules.empty:
+        return
+
+    def short_rule(row) -> str:
+        left = "; ".join(sorted(str(x) for x in row["antecedents"]))
+        right = "; ".join(sorted(str(x) for x in row["consequents"]))
+        text = f"{left}  →  {right}"
+        # wrap long labels
+        if len(text) > 80:
+            text = text[:77] + "..."
+        return text
+
+    labels = [short_rule(row) for _, row in rules.iterrows()][::-1]
+    lifts = rules["lift"].values[::-1]
+    fig, ax = plt.subplots(figsize=(11, 6.5))
+    ax.barh(labels, lifts, color="#3d5a80")
+    ax.axvline(1.0, color="#c1121f", linestyle="--", linewidth=1, label="lift = 1 (independence)")
+    ax.set_xlabel("Lift")
+    ax.set_title("Top association rules by lift (Apriori, min_support=0.10, min_confidence=0.50)")
+    ax.legend(loc="lower right")
+    _style_axes(ax)
+    fig.tight_layout()
+    fig.savefig(path, dpi=160, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved {path.name}\n")
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
 def main() -> None:
     print("EDS Project: What Makes Students Skip Classes?")
-    print("Cross-validation and confusion matrices  |  94 Google Form responses")
+    print("Classifier + association rules  |  94 Google Form responses")
     print(f"Data file: {DATA_PATH}\n")
 
     df = load_survey()
@@ -680,8 +899,12 @@ def main() -> None:
 
     print_example_predictions(fitted)
 
+    # --- Association rules and chi-square ---
+    association_rules_section(df, min_support=0.10, min_confidence=0.50)
+    chi_square_section(df, y)
+
     print("=" * 72)
-    print("Done. Figures are in:")
+    print("Done. Figures and CSV tables are in:")
     print(f"  {OUT_DIR}")
     print("=" * 72)
 
